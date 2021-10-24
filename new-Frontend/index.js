@@ -6,7 +6,7 @@
 
 DATA FORMAT
 {
-  mode:{ALERT | COMMAND},
+  mode:{ALERT | MOUSE-DATA | MOUSE-CLICK},
   data:{INT | STRING}
 }
 
@@ -73,15 +73,30 @@ function handleMouseMove(e) {
   }
 }
 
+function handleMouseClick(e) {
+  let offset = document.querySelector('#remote-video').getBoundingClientRect();
+  let pos = { x: e.pageX - offset.left, y: e.pageY - offset.top }
+  if (pos.x >= 0 && pos.x < offset.width && pos.y >= 0 && pos.y < offset.height) {
+    // if (Math.random() > 0.5)
+    remoteConnection.send(JSON.stringify({
+      mode: "MOUSE-CLICK",
+      data: `${Math.round(offset.width)}-${Math.round(offset.height)}-${Math.round(pos.x)}-${Math.round(pos.y)}`
+    }))
+  }
+
+}
+
+
 function attachHandlers() {
   local_stream.getTracks().forEach(function (track) {
     track.stop();
   });
+  document.getElementById("remote-video").addEventListener("click", handleMouseClick)
   document.addEventListener('mousemove', handleMouseMove)
   sendInterval = setInterval(() => {
     if (dataString !== lastDataString)
       remoteConnection.send(JSON.stringify({
-        mode: "COMMAND",
+        mode: "MOUSE-DATA",
         data: dataString
       }))
     lastDataString = dataString
@@ -101,6 +116,7 @@ function removeHandlers() {
 
   })
   clearInterval(sendInterval)
+  document.getElementById("remote-video").removeEventListener("click", handleMouseClick)
   document.removeEventListener('mousemove', handleMouseMove)
 }
 
@@ -119,12 +135,18 @@ function handleRemoteData(data) {
       }
   }
   else
-    if (data['mode'] === 'COMMAND') {
+    if (data['mode'] === 'MOUSE-DATA') {
       socket.send(JSON.stringify({
         mode: 'mouse-data',
         data: data['data']
       }))
     }
+    else if (data['mode'] === 'MOUSE-CLICK')
+      socket.send(JSON.stringify({
+        mode: 'mouse-click',
+        data: data['data']
+      }))
+
 }
 
 function setLocalStream(stream) {
