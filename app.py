@@ -6,7 +6,7 @@ import json
 # import win32ui
 # from win32api import GetSystemMetrics
 pyautogui.FAILSAFE = False
-task = None
+# task = None
 # dc = win32gui.GetDC(0)
 # dcObj = win32ui.CreateDCFromHandle(dc)
 # hwnd = win32gui.WindowFromPoint((0, 0))
@@ -34,8 +34,9 @@ def processMouseData(data):
     recv_width, recv_height, x, y = tuple(map(int, data.split("-")))
     x = int(mapData(x, 0, recv_width, 0, CLIENT_WIDTH))
     y = int(mapData(y, 0, recv_height, 0, CLIENT_HEIGHT))
-    # pyautogui.moveTo(x, y)
-    print(x, y)
+    # dcObj.Rectangle((x, y, x+30, y+30))
+    pyautogui.moveTo(x, y)
+    # print(x, y)
 
 
 async def main(socket, path):

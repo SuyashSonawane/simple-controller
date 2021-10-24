@@ -25,6 +25,10 @@ let currentPeer = null
 let screenSharing = false
 let remoteConnection = null
 let socket = null
+let dataString = null
+let lastDataString = null
+let sendInterval = null
+
 function createRoom() {
   console.log("Creating Room")
   let room = document.getElementById("room-input").value;
@@ -60,30 +64,43 @@ function createRoom() {
   })
 }
 
-// function processMouseMove(event) {
-//   let offset = document.querySelector('#remote-video').getBoundingClientRect();
-//   document.addEventListener('mousemove',
-//     function (e) {
-//       var pos = { left: e.pageX - offset.left, top: e.pageY - offset.top }
-//     })
-// }
-
 function handleMouseMove(e) {
   let offset = document.querySelector('#remote-video').getBoundingClientRect();
   let pos = { x: e.pageX - offset.left, y: e.pageY - offset.top }
   if (pos.x >= 0 && pos.x < offset.width && pos.y >= 0 && pos.y < offset.height) {
-    if (Math.random() > 0.7)
-      remoteConnection.send(JSON.stringify({
-        mode: "COMMAND",
-        data: `${Math.round(offset.width)}-${Math.round(offset.height)}-${Math.round(pos.x)}-${Math.round(pos.y)}`
-      }))
+    // if (Math.random() > 0.5)
+    dataString = `${Math.round(offset.width)}-${Math.round(offset.height)}-${Math.round(pos.x)}-${Math.round(pos.y)}`
   }
 }
 
 function attachHandlers() {
+  local_stream.getTracks().forEach(function (track) {
+    track.stop();
+  });
   document.addEventListener('mousemove', handleMouseMove)
+  sendInterval = setInterval(() => {
+    if (dataString !== lastDataString)
+      remoteConnection.send(JSON.stringify({
+        mode: "COMMAND",
+        data: dataString
+      }))
+    lastDataString = dataString
+  }, 100);
 }
 function removeHandlers() {
+  getUserMedia({ video: true, audio: true }, (stream) => {
+    local_stream = stream;
+    setLocalStream(local_stream)
+    let videoTrack = local_stream.getVideoTracks()[0];
+    if (peer) {
+      let sender = currentPeer.peerConnection.getSenders().find(function (s) {
+        return s.track.kind == videoTrack.kind;
+      })
+      sender.replaceTrack(videoTrack)
+    }
+
+  })
+  clearInterval(sendInterval)
   document.removeEventListener('mousemove', handleMouseMove)
 }
 
@@ -163,6 +180,7 @@ function joinRoom() {
       })
 
       call.on('stream', (stream) => {
+        console.log(stream)
         setRemoteStream(stream);
       })
       currentPeer = call;
@@ -177,6 +195,9 @@ function startScreenShare() {
   if (screenSharing) {
     stopScreenSharing()
   }
+  local_stream.getTracks().forEach(function (track) {
+    track.stop();
+  });
   navigator.mediaDevices.getDisplayMedia({ video: true }).then((stream) => {
     screenStream = stream;
     let videoTrack = screenStream.getVideoTracks()[0];
@@ -190,7 +211,8 @@ function startScreenShare() {
       sender.replaceTrack(videoTrack)
       screenSharing = true
       socket = new WebSocket('ws://127.0.0.1:5678');
-
+      document.getElementById("remote-video").style.display = "none"
+      document.getElementById("title").innerHTML = "Screen is being shared"
       socket.addEventListener('open', function (event) {
         console.log("connected with local socket")
       });
@@ -215,10 +237,24 @@ function stopScreenSharing() {
   screenStream.getTracks().forEach(function (track) {
     track.stop();
   });
+  document.getElementById("remote-video").style.display = "block"
+  document.getElementById("title").innerHTML = "Simple Controller"
   socket.close()
   remoteConnection.send(JSON.stringify({
     mode: "ALERT",
     data: 1
   }))
+  getUserMedia({ video: true, audio: true }, (stream) => {
+    local_stream = stream;
+    setLocalStream(local_stream)
+    let videoTrack = local_stream.getVideoTracks()[0];
+    if (peer) {
+      let sender = currentPeer.peerConnection.getSenders().find(function (s) {
+        return s.track.kind == videoTrack.kind;
+      })
+      sender.replaceTrack(videoTrack)
+    }
+
+  })
   screenSharing = false
 }

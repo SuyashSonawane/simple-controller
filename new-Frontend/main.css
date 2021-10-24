@@ -56,7 +56,7 @@ button {
   height: 90%;
   width: 100%;
   left: 0;
-  background: rebeccapurple;
+  background-color: lightgray;
 }
 
 #local-video {
