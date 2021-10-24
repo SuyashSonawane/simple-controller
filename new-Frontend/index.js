@@ -6,7 +6,7 @@
 
 DATA FORMAT
 {
-  mode:{ALERT | MOUSE-DATA | MOUSE-CLICK},
+  mode:{ALERT | MOUSE-DATA | MOUSE-CLICK-RIGHT | MOUSE-CLICK-LEFT | KEY},
   data:{INT | STRING}
 }
 
@@ -79,18 +79,39 @@ function handleMouseClick(e) {
   if (pos.x >= 0 && pos.x < offset.width && pos.y >= 0 && pos.y < offset.height) {
     // if (Math.random() > 0.5)
     remoteConnection.send(JSON.stringify({
-      mode: "MOUSE-CLICK",
+      mode: "MOUSE-CLICK-LEFT",
       data: `${Math.round(offset.width)}-${Math.round(offset.height)}-${Math.round(pos.x)}-${Math.round(pos.y)}`
     }))
   }
 
 }
 
+function handleKeyPress(event) {
+  remoteConnection.send(JSON.stringify({
+    mode: "KEY",
+    data: event.key
+  }))
+}
 
 function attachHandlers() {
   local_stream.getTracks().forEach(function (track) {
     track.stop();
   });
+
+  document.getElementById("remote-video").oncontextmenu = (e) => {
+    let offset = document.querySelector('#remote-video').getBoundingClientRect();
+    let pos = { x: e.pageX - offset.left, y: e.pageY - offset.top }
+    if (pos.x >= 0 && pos.x < offset.width && pos.y >= 0 && pos.y < offset.height) {
+      // if (Math.random() > 0.5)
+      remoteConnection.send(JSON.stringify({
+        mode: "MOUSE-CLICK-RIGHT",
+        data: `${Math.round(offset.width)}-${Math.round(offset.height)}-${Math.round(pos.x)}-${Math.round(pos.y)}`
+      }))
+    }
+    return false
+  }
+
+  document.body.addEventListener("keypress", handleKeyPress)
   document.getElementById("remote-video").addEventListener("click", handleMouseClick)
   document.addEventListener('mousemove', handleMouseMove)
   sendInterval = setInterval(() => {
@@ -116,8 +137,10 @@ function removeHandlers() {
 
   })
   clearInterval(sendInterval)
+  document.body.removeEventListener("keypress", handleKeyPress)
   document.getElementById("remote-video").removeEventListener("click", handleMouseClick)
   document.removeEventListener('mousemove', handleMouseMove)
+  document.getElementById("remote-video").oncontextmenu = null
 }
 
 function handleRemoteData(data) {
@@ -141,11 +164,22 @@ function handleRemoteData(data) {
         data: data['data']
       }))
     }
-    else if (data['mode'] === 'MOUSE-CLICK')
+    else if (data['mode'] === 'MOUSE-CLICK-LEFT')
       socket.send(JSON.stringify({
-        mode: 'mouse-click',
+        mode: 'mouse-click-left',
         data: data['data']
       }))
+    else if (data['mode'] === 'MOUSE-CLICK-RIGHT')
+      socket.send(JSON.stringify({
+        mode: 'mouse-click-right',
+        data: data['data']
+      }))
+    else if (data['mode'] === 'KEY')
+      socket.send(JSON.stringify({
+        mode: 'key',
+        data: data['data']
+      }))
+
 
 }
 

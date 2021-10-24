@@ -39,13 +39,21 @@ def processMouseData(data):
     # print(x, y)
 
 
-def processMouseClick(data):
+def processMouseClick(data, isRightKey):
     recv_width, recv_height, x, y = tuple(map(int, data.split("-")))
     x = int(mapData(x, 0, recv_width, 0, CLIENT_WIDTH))
     y = int(mapData(y, 0, recv_height, 0, CLIENT_HEIGHT))
     # dcObj.Rectangle((x, y, x+30, y+30))
-    pyautogui.click(x, y)
+    if isRightKey:
+        pyautogui.click(x, y, button="right")
+    else:
+        pyautogui.click(x, y)
+
     # print(x, y)
+
+
+def processKeyEvent(data):
+    pyautogui.press(data)
 
 
 async def main(socket, path):
@@ -66,8 +74,14 @@ async def main(socket, path):
         elif message['mode'] == 'mouse-data':
             # print(message)
             processMouseData(message['data'])
-        elif message['mode'] == 'mouse-click':
-            processMouseClick(message['data'])
+        elif message['mode'] == 'mouse-click-left':
+            processMouseClick(message['data'], False)
+
+        elif message['mode'] == 'mouse-click-right':
+            processMouseClick(message['data'], True)
+
+        elif message['mode'] == 'key':
+            processKeyEvent(message['data'])
 
 
 start_server = websockets.server.serve(main, "127.0.0.1", 5678)
