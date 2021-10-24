@@ -89,7 +89,7 @@ function handleMouseClick(e) {
 function handleKeyPress(event) {
   remoteConnection.send(JSON.stringify({
     mode: "KEY",
-    data: event.key
+    data: event.key.split("Arrow").splice(-1)[0]
   }))
 }
 
@@ -111,7 +111,7 @@ function attachHandlers() {
     return false
   }
 
-  document.body.addEventListener("keypress", handleKeyPress)
+  document.body.addEventListener("keydown", handleKeyPress)
   document.getElementById("remote-video").addEventListener("click", handleMouseClick)
   document.addEventListener('mousemove', handleMouseMove)
   sendInterval = setInterval(() => {
@@ -137,7 +137,7 @@ function removeHandlers() {
 
   })
   clearInterval(sendInterval)
-  document.body.removeEventListener("keypress", handleKeyPress)
+  document.body.removeEventListener("keydown", handleKeyPress)
   document.getElementById("remote-video").removeEventListener("click", handleMouseClick)
   document.removeEventListener('mousemove', handleMouseMove)
   document.getElementById("remote-video").oncontextmenu = null
