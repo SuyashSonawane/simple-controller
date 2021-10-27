@@ -6,7 +6,7 @@
 
 DATA FORMAT
 {
-  mode:{ALERT | MOUSE-DATA | MOUSE-CLICK-RIGHT | MOUSE-CLICK-LEFT | KEY},
+  mode:{ALERT | MOUSE-DATA | MOUSE-CLICK-RIGHT | MOUSE-CLICK-LEFT | KEY | SCROLL},
   data:{INT | STRING}
 }
 
@@ -87,9 +87,19 @@ function handleMouseClick(e) {
 }
 
 function handleKeyPress(event) {
+  if (event.key === "Tab" || event.key === "Alt" || event.key === "Shift") {
+    event.preventDefault()
+  }
   remoteConnection.send(JSON.stringify({
     mode: "KEY",
     data: event.key.split("Arrow").splice(-1)[0]
+  }))
+}
+
+function handleScrollWheel(event) {
+  remoteConnection.send(JSON.stringify({
+    mode: "SCROLL",
+    data: event.wheelDelta
   }))
 }
 
@@ -97,7 +107,6 @@ function attachHandlers() {
   local_stream.getTracks().forEach(function (track) {
     track.stop();
   });
-
   document.getElementById("remote-video").oncontextmenu = (e) => {
     let offset = document.querySelector('#remote-video').getBoundingClientRect();
     let pos = { x: e.pageX - offset.left, y: e.pageY - offset.top }
@@ -110,7 +119,7 @@ function attachHandlers() {
     }
     return false
   }
-
+  document.body.addEventListener("wheel", handleScrollWheel)
   document.body.addEventListener("keydown", handleKeyPress)
   document.getElementById("remote-video").addEventListener("click", handleMouseClick)
   document.addEventListener('mousemove', handleMouseMove)
@@ -138,6 +147,7 @@ function removeHandlers() {
   })
   clearInterval(sendInterval)
   document.body.removeEventListener("keydown", handleKeyPress)
+  document.body.removeEventListener("wheel", handleScrollWheel)
   document.getElementById("remote-video").removeEventListener("click", handleMouseClick)
   document.removeEventListener('mousemove', handleMouseMove)
   document.getElementById("remote-video").oncontextmenu = null
@@ -177,6 +187,11 @@ function handleRemoteData(data) {
     else if (data['mode'] === 'KEY')
       socket.send(JSON.stringify({
         mode: 'key',
+        data: data['data']
+      }))
+    else if (data['mode'] === 'SCROLL')
+      socket.send(JSON.stringify({
+        mode: 'scroll',
         data: data['data']
       }))
 

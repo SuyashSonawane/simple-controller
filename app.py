@@ -56,6 +56,10 @@ def processKeyEvent(data):
     pyautogui.press(data)
 
 
+def processScroll(data):
+    pyautogui.scroll(int(data))
+
+
 async def main(socket, path):
     async for message in socket:
         message = json.loads(message)
@@ -82,6 +86,9 @@ async def main(socket, path):
 
         elif message['mode'] == 'key':
             processKeyEvent(message['data'])
+
+        elif message['mode'] == 'scroll':
+            processScroll(message['data'])
 
 
 start_server = websockets.server.serve(main, "127.0.0.1", 5678)

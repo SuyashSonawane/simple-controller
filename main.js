@@ -47,8 +47,12 @@
 //   console.log('Message from server ', event.data);
 // });
 
-document.body.addEventListener("keypress", event => {
-  console.log(event.keyCode)
+document.body.addEventListener("keydown", e => {
+  console.log(e.key.split("Arrow").splice(-1)[0])
+  if (e.key === "Tab" || e.key === "Alt" || e.key === "Shift") {
+    e.preventDefault()
+    return false
+  }
 })
 
 document.getElementById("box").oncontextmenu = e => (false)
