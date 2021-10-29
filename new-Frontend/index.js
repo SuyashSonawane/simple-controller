@@ -41,7 +41,7 @@ function createRoom() {
   peer.on('open', (id) => {
     console.log("Peer Connected with ID: ", id)
     hideModal()
-    getUserMedia({ video: false, audio: true }, (stream) => {
+    getUserMedia({ video: true, audio: true }, (stream) => {
       local_stream = stream;
       setLocalStream(local_stream)
     }, (err) => {
@@ -133,7 +133,7 @@ function attachHandlers() {
   }, 100);
 }
 function removeHandlers() {
-  getUserMedia({ video: false, audio: true }, (stream) => {
+  getUserMedia({ video: true, audio: true }, (stream) => {
     local_stream = stream;
     setLocalStream(local_stream)
     let videoTrack = local_stream.getVideoTracks()[0];
@@ -202,9 +202,9 @@ function handleRemoteData(data) {
 function setLocalStream(stream) {
 
   let video = document.getElementById("local-video");
-  video.srcObject = stream;
-  video.muted = true;
-  video.play();
+  // video.srcObject = stream;
+  // video.muted = true;
+  // video.play();
 }
 function setRemoteStream(stream) {
   let video = document.getElementById("remote-video");
@@ -237,7 +237,7 @@ function joinRoom() {
   peer = new Peer()
   peer.on('open', (id) => {
     console.log("Connected with Id: " + id)
-    getUserMedia({ video: false, audio: true }, (stream) => {
+    getUserMedia({ video: true, audio: true }, (stream) => {
       local_stream = stream;
       setLocalStream(local_stream)
       notify("Joining peer")
@@ -267,9 +267,6 @@ function startScreenShare() {
   if (screenSharing) {
     stopScreenSharing()
   }
-  local_stream.getTracks().forEach(function (track) {
-    track.stop();
-  });
   navigator.mediaDevices.getDisplayMedia({ video: true }).then((stream) => {
     screenStream = stream;
     let videoTrack = screenStream.getVideoTracks()[0];
@@ -316,17 +313,17 @@ function stopScreenSharing() {
     mode: "ALERT",
     data: 1
   }))
-  getUserMedia({ video: false, audio: true }, (stream) => {
-    local_stream = stream;
-    setLocalStream(local_stream)
-    let videoTrack = local_stream.getVideoTracks()[0];
-    if (peer) {
-      let sender = currentPeer.peerConnection.getSenders().find(function (s) {
-        return s.track.kind == videoTrack.kind;
-      })
-      sender.replaceTrack(videoTrack)
-    }
+  // getUserMedia({ video: true, audio: true }, (stream) => {
+  //   local_stream = stream;
+  //   setLocalStream(local_stream)
+  //   let videoTrack = local_stream.getVideoTracks()[0];
+  //   if (peer) {
+  //     let sender = currentPeer.peerConnection.getSenders().find(function (s) {
+  //       return s.track.kind == videoTrack.kind;
+  //     })
+  //     sender.replaceTrack(videoTrack)
+  //   }
 
-  })
+  // })
   screenSharing = false
 }
