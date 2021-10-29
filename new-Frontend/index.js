@@ -41,7 +41,7 @@ function createRoom() {
   peer.on('open', (id) => {
     console.log("Peer Connected with ID: ", id)
     hideModal()
-    getUserMedia({ video: true, audio: true }, (stream) => {
+    getUserMedia({ video: false, audio: true }, (stream) => {
       local_stream = stream;
       setLocalStream(local_stream)
     }, (err) => {
@@ -133,7 +133,7 @@ function attachHandlers() {
   }, 100);
 }
 function removeHandlers() {
-  getUserMedia({ video: true, audio: true }, (stream) => {
+  getUserMedia({ video: false, audio: true }, (stream) => {
     local_stream = stream;
     setLocalStream(local_stream)
     let videoTrack = local_stream.getVideoTracks()[0];
@@ -169,6 +169,7 @@ function handleRemoteData(data) {
   }
   else
     if (data['mode'] === 'MOUSE-DATA') {
+      console.log(data['data'])
       socket.send(JSON.stringify({
         mode: 'mouse-data',
         data: data['data']
@@ -236,7 +237,7 @@ function joinRoom() {
   peer = new Peer()
   peer.on('open', (id) => {
     console.log("Connected with Id: " + id)
-    getUserMedia({ video: true, audio: true }, (stream) => {
+    getUserMedia({ video: false, audio: true }, (stream) => {
       local_stream = stream;
       setLocalStream(local_stream)
       notify("Joining peer")
@@ -315,7 +316,7 @@ function stopScreenSharing() {
     mode: "ALERT",
     data: 1
   }))
-  getUserMedia({ video: true, audio: true }, (stream) => {
+  getUserMedia({ video: false, audio: true }, (stream) => {
     local_stream = stream;
     setLocalStream(local_stream)
     let videoTrack = local_stream.getVideoTracks()[0];

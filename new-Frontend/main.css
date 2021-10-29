@@ -51,12 +51,19 @@ button {
   padding: 5px;
 }
 
+.meet-area {
+  display: flex;
+  height: 90%;
+  justify-content: center;
+  align-items: center;
+}
+
 #remote-video {
   top: 0;
-  height: 90%;
-  width: 100%;
+  height: fit-content;
+  max-height: 95%;
+  max-width: 100%;
   left: 0;
-  background-color: lightgray;
 }
 
 #local-video {
