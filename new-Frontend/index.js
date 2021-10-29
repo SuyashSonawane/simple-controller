@@ -104,9 +104,9 @@ function handleScrollWheel(event) {
 }
 
 function attachHandlers() {
-  local_stream.getTracks().forEach(function (track) {
-    track.stop();
-  });
+  // local_stream.getTracks().forEach(function (track) {
+  //   track.stop();
+  // });
   document.getElementById("remote-video").oncontextmenu = (e) => {
     let offset = document.querySelector('#remote-video').getBoundingClientRect();
     let pos = { x: e.pageX - offset.left, y: e.pageY - offset.top }
@@ -133,18 +133,18 @@ function attachHandlers() {
   }, 100);
 }
 function removeHandlers() {
-  getUserMedia({ video: true, audio: true }, (stream) => {
-    local_stream = stream;
-    setLocalStream(local_stream)
-    let videoTrack = local_stream.getVideoTracks()[0];
-    if (peer) {
-      let sender = currentPeer.peerConnection.getSenders().find(function (s) {
-        return s.track.kind == videoTrack.kind;
-      })
-      sender.replaceTrack(videoTrack)
-    }
+  // getUserMedia({ video: true, audio: true }, (stream) => {
+  //   local_stream = stream;
+  //   setLocalStream(local_stream)
+  //   let videoTrack = local_stream.getVideoTracks()[0];
+  //   if (peer) {
+  //     let sender = currentPeer.peerConnection.getSenders().find(function (s) {
+  //       return s.track.kind == videoTrack.kind;
+  //     })
+  //     sender.replaceTrack(videoTrack)
+  //   }
 
-  })
+  // })
   clearInterval(sendInterval)
   document.body.removeEventListener("keydown", handleKeyPress)
   document.body.removeEventListener("wheel", handleScrollWheel)
@@ -202,9 +202,9 @@ function handleRemoteData(data) {
 function setLocalStream(stream) {
 
   let video = document.getElementById("local-video");
-  // video.srcObject = stream;
-  // video.muted = true;
-  // video.play();
+  video.srcObject = stream;
+  video.muted = true;
+  video.play();
 }
 function setRemoteStream(stream) {
   let video = document.getElementById("remote-video");
@@ -252,7 +252,6 @@ function joinRoom() {
       })
 
       call.on('stream', (stream) => {
-        console.log(stream)
         setRemoteStream(stream);
       })
       currentPeer = call;
