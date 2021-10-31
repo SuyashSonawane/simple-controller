@@ -1,12 +1,16 @@
-import PySimpleGUI as sg
 import asyncio
 import websockets
 import pyautogui
 import json
-import sys
-import random
-
+# import win32gui
+# import win32ui
+# from win32api import GetSystemMetrics
 pyautogui.FAILSAFE = False
+# task = None
+# dc = win32gui.GetDC(0)
+# dcObj = win32ui.CreateDCFromHandle(dc)
+# hwnd = win32gui.WindowFromPoint((0, 0))
+# monitor = (0, 0, GetSystemMetrics(0), GetSystemMetrics(1))
 CLIENT_WIDTH, CLIENT_HEIGHT = pyautogui.size()
 
 
@@ -57,7 +61,6 @@ def processScroll(data):
 
 
 async def main(socket, path):
-    window['-client-status-'].update("Client Connected")
     async for message in socket:
         message = json.loads(message)
         if message['mode'] == 'command':
@@ -71,6 +74,7 @@ async def main(socket, path):
         elif message['mode'] == 'calibration-data':
             REMOTE_WIDTH, REMOTE_HEIGHT = tuple(
                 map(int, message['data'].split("-")))
+
         elif message['mode'] == 'mouse-data':
             # print(message)
             processMouseData(message['data'])
@@ -87,36 +91,7 @@ async def main(socket, path):
             processScroll(message['data'])
 
 
-layout = [[sg.Text('Start the client', size=(35, 1))],
-          [sg.Text(key='-status-')],
-          [sg.Text(key='-client-status-')],
-          [sg.Button('Start'), sg.Button('Stop')]]
-
-
-window = sg.Window('Simple Controller', layout)
-
-
-async def ui():
-    task = None
-    while True:
-        event, values = window.read(timeout=1)
-        if event == sg.WIN_CLOSED or event == 'Stop':
-            sys.exit()
-        elif event == "Start":
-            if task is None:
-                task = asyncio.get_event_loop().create_task(process())
-        await asyncio.sleep(0.0001)
-
-
-async def process():
-    start_server = websockets.server.serve(main, "127.0.0.1", 5678)
-    window['-status-'].update("Server running")
-    asyncio.get_event_loop().run_until_complete(start_server)
-
-
-async def wait_list():
-    await asyncio.wait([ui()])
-
-if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(wait_list())
+start_server = websockets.server.serve(main, "127.0.0.1", 5678)
+print("progarm initialted")
+asyncio.get_event_loop().run_until_complete(start_server)
+asyncio.get_event_loop().run_forever()

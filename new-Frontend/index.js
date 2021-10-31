@@ -3,6 +3,8 @@
 
 0 - screen sharing starts
 1 - screen sharing stops
+2 - video status
+3 - audio status
 
 DATA FORMAT
 {
@@ -28,13 +30,20 @@ let socket = null
 let dataString = null
 let lastDataString = null
 let sendInterval = null
+let isVideo = true;
+let isAudio = true;
+let cursorHidden = false;
 
 $(".meet-controls-bar").hide()
 $("#stopScreenShareBtn").hide()
+$("#cursorToggle").hide()
 $("#createRoomBtn").click(createRoom)
 $("#joinRoomBtn").click(joinRoom)
 $("#startScreenShareBtn").click(startScreenShare)
 $("#stopScreenShareBtn").click(stopScreenSharing)
+$("#videoToggle").click(toggleVideo)
+$("#audioToggle").click(toggleAudio)
+$("#cursorToggle").click(cursorToggle)
 
 
 function createRoom() {
@@ -113,9 +122,8 @@ function handleScrollWheel(event) {
 }
 
 function attachHandlers() {
-  // local_stream.getTracks().forEach(function (track) {
-  //   track.stop();
-  // });
+  $("#startScreenShareBtn").hide()
+  $("#cursorToggle").show()
   document.getElementById("remote-video").oncontextmenu = (e) => {
     let offset = document.querySelector('#remote-video').getBoundingClientRect();
     let pos = { x: e.pageX - offset.left, y: e.pageY - offset.top }
@@ -139,9 +147,11 @@ function attachHandlers() {
         data: dataString
       }))
     lastDataString = dataString
-  }, 100);
+  }, 60);
 }
 function removeHandlers() {
+  $("#startScreenShareBtn").show()
+  $("#cursorToggle").hide()
   clearInterval(sendInterval)
   document.body.removeEventListener("keydown", handleKeyPress)
   document.body.removeEventListener("wheel", handleScrollWheel)
@@ -156,17 +166,19 @@ function handleRemoteData(data) {
     if (data['data'] === 0) {
       console.log("staring screen share")
       attachHandlers()
-
     }
     else
       if (data['data'] === 1) {
         console.log("stoping screen share")
         removeHandlers()
       }
+      else if (data['data'] === 2)
+        notify(`remote video enabled: ${data['status']}`)
+      else if (data['data'] === 3)
+        notify(`remote audio enabled: ${data['status']}`)
   }
   else
     if (data['mode'] === 'MOUSE-DATA') {
-      console.log(data['data'])
       socket.send(JSON.stringify({
         mode: 'mouse-data',
         data: data['data']
@@ -196,6 +208,32 @@ function handleRemoteData(data) {
 
 }
 
+function toggleVideo() {
+  $("#videoToggle").toggleClass("active")
+  isVideo = !isVideo
+  local_stream.getVideoTracks()[0].enabled = isVideo
+  remoteConnection.send(JSON.stringify({
+    mode: "ALERT",
+    data: 2,
+    status: isVideo
+  }))
+}
+function toggleAudio() {
+  $("#audioToggle").toggleClass("active")
+  isAudio = !isAudio
+  local_stream.getAudioTracks()[0].enabled = isAudio
+  remoteConnection.send(JSON.stringify({
+    mode: "ALERT",
+    data: 3,
+    status: isAudio
+  }))
+}
+function cursorToggle() {
+  $("#cursorToggle").toggleClass("active")
+  cursorHidden ? $("#remote-video").css("cursor", "default") : $("#remote-video").css("cursor", "none")
+  cursorHidden = !cursorHidden
+}
+
 function setLocalStream(stream) {
 
   let video = document.getElementById("local-video");
@@ -219,7 +257,7 @@ function notify(msg) {
   notification.hidden = false
   setTimeout(() => {
     notification.hidden = true;
-  }, 3000)
+  }, 5000)
 }
 
 function joinRoom() {

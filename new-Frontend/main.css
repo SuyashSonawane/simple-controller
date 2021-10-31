@@ -77,7 +77,7 @@ button {
   display: flex;
   height: 90%;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
 
 #remote-video {
@@ -111,4 +111,8 @@ button {
 .meet-controls-bar button {
   background-color: var(--text-secondary);
   color: var(--background);
+}
+
+.active {
+  background-color: #4caf50 !important;
 }
