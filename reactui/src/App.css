@@ -1,30 +1,46 @@
 body {
   margin: 0;
-  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-/* .title {
+:root {
+  --text-main: #5e5e5e;
+  --text-secondary: #6f6f70;
+  --background: #fff;
+}
+
+button {
+  background: none;
+  border-radius: 150px;
+  border: 0.2px solid var(--text-secondary);
+  padding: 5px;
+  cursor: pointer;
+  color: var(--text-main);
+}
+
+
+.title {
   top: 0;
-  width: 100%;
   max-width: 100%;
   z-index: 1;
-  background-color: #444444;
-  color: white;
+  background-color: var(--background);
+  color: var(--text-main);
   margin: 0;
+  padding: 15px;
+  box-shadow: 0 4px 4px #00000040;
 }
 
 .entry-modal {
-  border: 1px solid #444444;
   width: 300px;
   margin: auto;
   z-index: 9999;
   position: absolute;
   left: 50%;
-  top: 70px;
+  top: 90px;
   margin-left: -150px;
   padding: 5px;
-  color: #fff;
-  background-color: #444444;
+  color: var(--text-main);
+  background-color: var(--background);
   text-align: center;
 }
 
@@ -32,31 +48,44 @@ body {
   position: absolute;
   z-index: 1;
   text-align: center;
-  color: #fff;
+  color: var(--text-main);
   margin: 0;
   top: 47.33px;
   font-size: 18pt;
   width: 100%;
-  background-color: orange;
+  background-color: var(--background);
 }
 
 
 .room-input {
   border: none;
   padding: 5px;
+  margin-bottom: 15px;
+  border-bottom: 0.2px solid var(--text-secondary);
+}
+
+.room-input:focus-visible {
+  outline: none;
 }
 
 button {
   margin: 3px;
-  padding: 5px;
+  padding: 8px;
+}
+
+.meet-area {
+  display: flex;
+  height: 90%;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 #remote-video {
   top: 0;
-  height: 90vh;
-  width: 100%;
+  height: fit-content;
+  max-height: 95%;
+  max-width: 100%;
   left: 0;
-  background-color: lightgray;
 }
 
 #local-video {
@@ -67,111 +96,40 @@ button {
   z-index: 1;
   display: none;
   right: 15;
-  background-color: #444444;
+  background-color: var(--background);
   position: absolute;
 }
 
 .meet-controls-bar {
   bottom: 0;
-  background-color: black;
+  background-color: var(--background);
   left: 0;
-  height: 10vh;
   position: absolute;
   width: 100%;
-} */
-
-/* custom */
-.header {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  justify-content: space-around;
-  align-items: center;
-  text-align: center;
-  background-color: #123d6a;
-  color: #edc8b8;
 }
 
-#remote-video {
-  width: 100%;
-  height: 80vh;
-
+.meet-controls-bar button {
+  background-color: var(--text-secondary);
+  color: var(--background);
 }
 
-.floating-div {
+.active {
+  background-color: #4caf50 !important;
+}
+
+#downloadClient {
   position: absolute;
-  bottom: 15px;
-  left: 50%;
-  display: flex;
-  width: 350px;
-  justify-content: space-between;
-  transform: translateX(-50%);
-}
-
-.floating-div p {
-  background-color: #ab3b61;
+  right: 5px;
+  top: 5px;
   padding: 15px;
-  border-radius: 150px;
-  color: #ffff;
-  cursor: pointer;
-  box-shadow: 1px 1px 9px 0px #00000052;
-}
-
-.disabled {
-  background-color: #d8d8d8;
-  color: #413b3b;
-}
-
-.connection-dialogue {
-  position: absolute;
-  top: 20%;
-  left: 50%;
-  transform: translateX(-50%);
-  /* width: 450px; */
-  border: 0.9px solid #edc8b8;
-  /* height: 200px; */
-  border-radius: 50px;
-  background-color: #ab3b61;
-  z-index: 1;
-  color: white;
-  padding: 55px;
-}
-
-input {
-  background: none;
-  border: none;
-  outline: none;
-  color: white;
-  border-bottom: 0.1px solid #edc8b8;
-}
-
-.options {
   display: flex;
-  margin-top: 20px;
-  justify-content: space-evenly;
-}
-
-.btn {
-  background-color: #123d6a;
-  padding: 10px;
-  border-radius: 10px;
+  align-items: center;
+  justify-content: space-between;
+  width: 170px;
+  color: var(--text-main);
   cursor: pointer;
 }
 
-.error {
-  position: absolute;
-  bottom: 5px;
-  background-color: #ab3b61;
-  left: 50%;
-  transform: translateX(-50%);
-  color: white;
-  padding: 5px;
-  max-width: 450px;
-  border-radius: 10px;
-}
-
-#local-video {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 150px;
+#downloadClient img {
+  width: 35px;
 }
