@@ -29,9 +29,17 @@ let dataString = null
 let lastDataString = null
 let sendInterval = null
 
+$(".meet-controls-bar").hide()
+$("#stopScreenShareBtn").hide()
+$("#createRoomBtn").click(createRoom)
+$("#joinRoomBtn").click(joinRoom)
+$("#startScreenShareBtn").click(startScreenShare)
+$("#stopScreenShareBtn").click(stopScreenSharing)
+
+
 function createRoom() {
   console.log("Creating Room")
-  let room = document.getElementById("room-input").value;
+  let room = $("#room-input").val();
   if (room == " " || room == "") {
     alert("Please enter room number")
     return;
@@ -61,6 +69,7 @@ function createRoom() {
       setRemoteStream(stream)
     })
     currentPeer = call;
+    $(".meet-controls-bar").show()
   })
 }
 
@@ -133,18 +142,6 @@ function attachHandlers() {
   }, 100);
 }
 function removeHandlers() {
-  // getUserMedia({ video: true, audio: true }, (stream) => {
-  //   local_stream = stream;
-  //   setLocalStream(local_stream)
-  //   let videoTrack = local_stream.getVideoTracks()[0];
-  //   if (peer) {
-  //     let sender = currentPeer.peerConnection.getSenders().find(function (s) {
-  //       return s.track.kind == videoTrack.kind;
-  //     })
-  //     sender.replaceTrack(videoTrack)
-  //   }
-
-  // })
   clearInterval(sendInterval)
   document.body.removeEventListener("keydown", handleKeyPress)
   document.body.removeEventListener("wheel", handleScrollWheel)
@@ -227,7 +224,7 @@ function notify(msg) {
 
 function joinRoom() {
   console.log("Joining Room")
-  let room = document.getElementById("room-input").value;
+  let room = $("#room-input").val();
   if (room == " " || room == "") {
     alert("Please enter room number")
     return;
@@ -255,6 +252,7 @@ function joinRoom() {
         setRemoteStream(stream);
       })
       currentPeer = call;
+      $(".meet-controls-bar").show()
     }, (err) => {
       console.log(err)
     })
@@ -279,8 +277,8 @@ function startScreenShare() {
       sender.replaceTrack(videoTrack)
       screenSharing = true
       socket = new WebSocket('ws://127.0.0.1:5678');
-      document.getElementById("remote-video").style.display = "none"
-      document.getElementById("title").innerHTML = "Screen is being shared"
+      $("#remote-video").hide()
+      $("#title").text("Screen is being shared")
       socket.addEventListener('open', function (event) {
         console.log("connected with local socket")
       });
@@ -290,6 +288,8 @@ function startScreenShare() {
       }))
     }
     console.log(screenStream)
+    $("#startScreenShareBtn").hide()
+    $("#stopScreenShareBtn").show()
   })
 }
 
@@ -305,8 +305,8 @@ function stopScreenSharing() {
   screenStream.getTracks().forEach(function (track) {
     track.stop();
   });
-  document.getElementById("remote-video").style.display = "block"
-  document.getElementById("title").innerHTML = "Simple Controller"
+  $("#remote-video").show()
+  $("#title").text("Simple Controller")
   socket.close()
   remoteConnection.send(JSON.stringify({
     mode: "ALERT",
@@ -324,5 +324,7 @@ function stopScreenSharing() {
   //   }
 
   // })
+  $("#startScreenShareBtn").show()
+  $("#stopScreenShareBtn").hide()
   screenSharing = false
 }
