@@ -302,33 +302,40 @@ function startScreenShare() {
   if (screenSharing) {
     stopScreenSharing()
   }
-  navigator.mediaDevices.getDisplayMedia({ video: true }).then((stream) => {
-    screenStream = stream;
-    let videoTrack = screenStream.getVideoTracks()[0];
-    videoTrack.onended = () => {
-      stopScreenSharing()
-    }
-    if (peer) {
-      let sender = currentPeer.peerConnection.getSenders().find(function (s) {
-        return s.track.kind == videoTrack.kind;
+  try {
+    socket = new WebSocket('ws://127.0.0.1:5678');
+    $("#remote-video").hide()
+    socket.addEventListener('open', function (event) {
+      navigator.mediaDevices.getDisplayMedia({ video: true }).then((stream) => {
+        screenStream = stream;
+        let videoTrack = screenStream.getVideoTracks()[0];
+        videoTrack.onended = () => {
+          stopScreenSharing()
+        }
+        if (peer) {
+          let sender = currentPeer.peerConnection.getSenders().find(function (s) {
+            return s.track.kind == videoTrack.kind;
+          })
+          sender.replaceTrack(videoTrack)
+          screenSharing = true
+          remoteConnection.send(JSON.stringify({
+            mode: "ALERT",
+            data: 0
+          }))
+        }
+        $("#title").text("Screen is being shared")
+        console.log(screenStream)
+        $("#startScreenShareBtn").hide()
+        $("#stopScreenShareBtn").show()
       })
-      sender.replaceTrack(videoTrack)
-      screenSharing = true
-      socket = new WebSocket('ws://127.0.0.1:5678');
-      $("#remote-video").hide()
-      $("#title").text("Screen is being shared")
-      socket.addEventListener('open', function (event) {
-        console.log("connected with local socket")
-      });
-      remoteConnection.send(JSON.stringify({
-        mode: "ALERT",
-        data: 0
-      }))
+      console.log("connected with local socket")
+    });
+    socket.onerror = (event) => {
+      notify("Cannot connect to client, ensure client is running")
     }
-    console.log(screenStream)
-    $("#startScreenShareBtn").hide()
-    $("#stopScreenShareBtn").show()
-  })
+  } catch (e) {
+    notify(e.message)
+  }
 }
 
 function stopScreenSharing() {

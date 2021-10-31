@@ -116,3 +116,20 @@ button {
 .active {
   background-color: #4caf50 !important;
 }
+
+#downloadClient {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 170px;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+#downloadClient img {
+  width: 35px;
+}
