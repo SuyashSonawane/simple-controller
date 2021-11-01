@@ -44,6 +44,7 @@ $("#stopScreenShareBtn").click(stopScreenSharing)
 $("#videoToggle").click(toggleVideo)
 $("#audioToggle").click(toggleAudio)
 $("#cursorToggle").click(cursorToggle)
+$("#localToggle").click(localToggle)
 
 
 function createRoom() {
@@ -207,7 +208,14 @@ function handleRemoteData(data) {
 
 
 }
+function localToggle() {
+  $("#localToggle").toggleClass("active")
 
+  if ($('#local-video:visible').length)
+    $('#local-video').hide();
+  else
+    $('#local-video').show();
+}
 function toggleVideo() {
   $("#videoToggle").toggleClass("active")
   isVideo = !isVideo

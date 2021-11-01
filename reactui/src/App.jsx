@@ -17,24 +17,24 @@ DATA FORMAT
 
 */
 
+const PRE = "SIMPLE"
+const SUF = "CONTROLLER"
+let room_id;
+let getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+let screenStream;
+let peer = null;
+let currentPeer = null
+let screenSharing = false
+let remoteConnection = null
+let socket = null
+let dataString = null
+let lastDataString = null
+let sendInterval = null
+
 export default function App() {
 
-  const PRE = "SIMPLE"
-  const SUF = "CONTROLLER"
-  let room_id;
-  let getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-  let local_stream;
-  let screenStream;
-  let peer = null;
-  let currentPeer = null
-  let screenSharing = false
-  let remoteConnection = null
-  let socket = null
-  let dataString = null
-  let lastDataString = null
-  let sendInterval = null
-
-  const [showStartScreenShareBtn, setShowStartScreenShareBtn] = useState(false)
+  const [localStream, setLocalStream] = useState(null)
+  const [showStartScreenShareBtn, setShowStartScreenShareBtn] = useState(true)
   const [showStopScreenShareBtn, setShowStopScreenShareBtn] = useState(false)
   const [showCursorToggleBtn, setShowCursorToggleBtn] = useState(false)
   const [isAudio, setIsAudio] = useState(true)
@@ -46,6 +46,10 @@ export default function App() {
 
   const remoteVideo = useRef(null)
   const localVideo = useRef(null)
+
+  function getLocalStream() {
+    return localStream
+  }
 
   function createRoom() {
     console.log("Creating Room")
@@ -60,26 +64,27 @@ export default function App() {
       console.log("Peer Connected with ID: ", id)
       hideModal()
       getUserMedia({ video: true, audio: true }, (stream) => {
-        local_stream = stream;
-        setLocalStream(local_stream)
+        setLocalStream(stream)
+        setLocalStreamUI(stream)
+        peer.on('connection', conn => {
+          remoteConnection = conn
+          conn.on('data', data => {
+            handleRemoteData(data)
+          })
+        })
+        peer.on('call', (call) => {
+          let s = getLocalStream()
+          call.answer(s);
+          call.on('stream', (stream) => {
+            setRemoteStream(stream)
+          })
+          currentPeer = call;
+          setShowMeetBar(true)
+        })
       }, (err) => {
         console.log(err)
       })
       notify("Waiting for peer to join.")
-    })
-    peer.on('connection', conn => {
-      remoteConnection = conn
-      conn.on('data', data => {
-        handleRemoteData(data)
-      })
-    })
-    peer.on('call', (call) => {
-      call.answer(local_stream);
-      call.on('stream', (stream) => {
-        setRemoteStream(stream)
-      })
-      currentPeer = call;
-      setShowMeetBar(true)
     })
   }
 
@@ -211,7 +216,7 @@ export default function App() {
 
   function toggleVideo() {
     setIsVideo(!isVideo)
-    local_stream.getVideoTracks()[0].enabled = isVideo
+    localStream.getVideoTracks()[0].enabled = isVideo
     remoteConnection.send(JSON.stringify({
       mode: "ALERT",
       data: 2,
@@ -220,7 +225,7 @@ export default function App() {
   }
   function toggleAudio() {
     setIsAudio(!isAudio)
-    local_stream.getAudioTracks()[0].enabled = isAudio
+    localStream.getAudioTracks()[0].enabled = isAudio
     remoteConnection.send(JSON.stringify({
       mode: "ALERT",
       data: 3,
@@ -232,14 +237,14 @@ export default function App() {
     setIsCursorHidden(!isCursorHidden)
   }
 
-  function setLocalStream(stream) {
-    let video = document.getElementById("local-video");
+  function setLocalStreamUI(stream) {
+    let video = localVideo.current
     video.srcObject = stream;
     video.muted = true;
     video.play();
   }
   function setRemoteStream(stream) {
-    let video = document.getElementById("remote-video");
+    let video = remoteVideo.current
     video.srcObject = stream;
     video.play();
   }
@@ -270,8 +275,8 @@ export default function App() {
     peer.on('open', (id) => {
       console.log("Connected with Id: " + id)
       getUserMedia({ video: true, audio: true }, (stream) => {
-        local_stream = stream;
-        setLocalStream(local_stream)
+        setLocalStream(stream)
+        setLocalStreamUI(stream)
         notify("Joining peer")
         let call = peer.call(room_id, stream)
         let connection = peer.connect(room_id)
@@ -284,6 +289,7 @@ export default function App() {
         })
 
         call.on('stream', (stream) => {
+          debugger
           setRemoteStream(stream);
         })
         currentPeer = call;
@@ -337,7 +343,7 @@ export default function App() {
 
   function stopScreenSharing() {
     if (!screenSharing) return;
-    let videoTrack = local_stream.getVideoTracks()[0];
+    let videoTrack = localStream.getVideoTracks()[0];
     if (peer) {
       let sender = currentPeer.peerConnection.getSenders().find(function (s) {
         return s.track.kind == videoTrack.kind;
