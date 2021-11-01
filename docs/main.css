@@ -94,7 +94,7 @@ button {
   object-fit: cover;
   height: 150;
   z-index: 1;
-  /* display: none; */
+  display: none;
   right: 15;
   background-color: var(--background);
   position: absolute;
