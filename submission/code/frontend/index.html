@@ -1,0 +1,62 @@
+<html>
+
+<head>
+  <title>Simple Controller</title>
+  <link rel="stylesheet" type="text/css" href="main.css">
+  <link rel="shortcut icon" href="./images/icon.png" type="image/png">
+  <meta http-equiv="content-language" content="en">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="keywords" content="simple controller, simple, suyashsonawane">
+  <meta name="author" content="Suyash Sonawane">
+  <meta name="publisher" content="Suyash Sonawane">
+  <meta name="copyright" content="Suyash Sonawane">
+  <meta name="description"
+    content="Simple Controller is a secure, free, anonymous and platform independent remote desktop controller">
+  <meta name="page-topic" content="Technology">
+  <meta name="page-type" content="Technology">
+  <meta name="audience" content="Everyone">
+  <meta name="robots" content="index, follow">
+</head>
+
+<body>
+  <h1 class="title" id="title">Simple Controller</h1>
+  <p id="notification" hidden=""></p>
+  <div class="entry-modal" id="entry-modal">
+    <h2>Create or Join Meeting</h2>
+    <input id="room-input" class="room-input" placeholder="Enter Room ID">
+    <div>
+      <button id="createRoomBtn">Create Room</button>
+      <button id="joinRoomBtn">Join Room</button>
+    </div>
+  </div>
+  <div class="meet-area">
+    <!-- Remote Video Element-->
+    <video id="remote-video"></video>
+
+    <!-- Local Video Element-->
+    <video id="local-video"></video>
+    <div class="meet-controls-bar" style="display: none;">
+      <button id="videoToggle" class="active">Video</button>
+      <button id="audioToggle" class="active">Audio</button>
+      <button id="startScreenShareBtn">Screen Share</button>
+      <button id="stopScreenShareBtn" style="display: none;">Stop Share</button>
+      <button id="cursorToggle" style="display: none;">Hide Cursor</button>
+      <button id="localToggle">Hide LocalVideo</button>
+    </div>
+  </div>
+  <a href="./app.exe" id="downloadClient" target="_blank" rel="noopener noreferrer">
+    <img src="./images/download.png">
+    Download Client
+  </a>
+
+
+  <script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+    integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="index.js"></script>
+
+</body>
+
+</html>
